@@ -158,7 +158,7 @@ int main(void)
     flexcanConfig.clkSrc = EXAMPLE_CAN_CLK_SOURCE;
 #endif
 
-    flexcanConfig.enableLoopBack = true;
+//    flexcanConfig.enableLoopBack = true;
     flexcanConfig.baudRate               = 125000U;
 
     FLEXCAN_Init(EXAMPLE_CAN, &flexcanConfig, EXAMPLE_CAN_CLK_FREQ);
@@ -167,10 +167,11 @@ int main(void)
     FLEXCAN_TransferCreateHandle(EXAMPLE_CAN, &flexcanHandle, flexcan_callback, NULL);
 
     /* Start the scheduler. */
-     vTaskStartScheduler();
-     while(1)
-     {
-     }
+    vTaskStartScheduler();
+
+    while(1){
+    	// Never come here
+    }
 }
 
 
@@ -178,7 +179,7 @@ void CAN_Rx_Task(void* Args){
 	/* Setup Rx Message Buffer. */
     mbConfig.format = kFLEXCAN_FrameFormatStandard;
     mbConfig.type   = kFLEXCAN_FrameTypeData;
-    mbConfig.id     = FLEXCAN_ID_STD(0x123);
+    mbConfig.id     = FLEXCAN_ID_STD(0x124);	// 0x124 no loop
 
     FLEXCAN_SetRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
 
@@ -201,7 +202,7 @@ void CAN_Rx_Task(void* Args){
 
 void CAN_Tx_Task(void* Args){
 	TickType_t xLastWakeTime;
-	const TickType_t xPeriod = pdMS_TO_TICKS( 2000 );
+	const TickType_t xPeriod = pdMS_TO_TICKS( 4000 );	// Keep Alive every 5 seconds
 	xLastWakeTime = xTaskGetTickCount();
 
 	/* Setup Tx Message Buffer. */
@@ -216,16 +217,16 @@ void CAN_Tx_Task(void* Args){
 	txXfer.mbIdx = (uint8_t)TX_MESSAGE_BUFFER_NUM;
 	txXfer.frame = &txFrame;
 
-	txFrame.dataWord0 = CAN_WORD0_DATA_BYTE_0(0x11) | CAN_WORD0_DATA_BYTE_1(0x22) | CAN_WORD0_DATA_BYTE_2(0x33) |
-						CAN_WORD0_DATA_BYTE_3(0x44);
-	txFrame.dataWord1 = CAN_WORD1_DATA_BYTE_4(0x55) | CAN_WORD1_DATA_BYTE_5(0x66) | CAN_WORD1_DATA_BYTE_6(0x77) |
-						CAN_WORD1_DATA_BYTE_7(0x88);
+	txFrame.dataWord0 = CAN_WORD0_DATA_BYTE_0(0x10) | CAN_WORD0_DATA_BYTE_1(0x20) | CAN_WORD0_DATA_BYTE_2(0x30) |
+						CAN_WORD0_DATA_BYTE_3(0x40);
+	txFrame.dataWord1 = CAN_WORD1_DATA_BYTE_4(0x50) | CAN_WORD1_DATA_BYTE_5(0x60) | CAN_WORD1_DATA_BYTE_6(0x70) |
+						CAN_WORD1_DATA_BYTE_7(0x80);
 
 	for(;;){
 		/* Send data through Tx Message Buffer. */
 		(void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &flexcanHandle, &txXfer);
 		if(txComplete){
-			LOG_INFO("Send message from MB%d to MB%d\r\n", TX_MESSAGE_BUFFER_NUM, RX_MESSAGE_BUFFER_NUM);
+			LOG_INFO("\r\nSend message from MB%d to MB%d\r\n", TX_MESSAGE_BUFFER_NUM, RX_MESSAGE_BUFFER_NUM);
 			LOG_INFO("tx word0 = 0x%x\r\n", txFrame.dataWord0);
 			LOG_INFO("tx word1 = 0x%x\r\n", txFrame.dataWord1);
 			txComplete = false;
