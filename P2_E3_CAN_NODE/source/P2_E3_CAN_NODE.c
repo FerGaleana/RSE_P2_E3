@@ -27,8 +27,10 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "board.h"
+/* TODO: insert other include files here. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "MensajesTxRx.h"
 
 /*******************************************************************************
  * Definitions
