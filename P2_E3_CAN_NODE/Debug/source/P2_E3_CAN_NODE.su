@@ -1,0 +1,4 @@
+../source/P2_E3_CAN_NODE.c:73:8:flexcan_callback	24	static
+../source/P2_E3_CAN_NODE.c:101:5:main	40	static
+../source/P2_E3_CAN_NODE.c:181:6:CAN_Rx_Task	16	static
+../source/P2_E3_CAN_NODE.c:206:6:CAN_Tx_Task	24	static

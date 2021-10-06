@@ -27,6 +27,7 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "board.h"
+
 /* TODO: insert other include files here. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -204,7 +205,7 @@ void CAN_Rx_Task(void* Args){
 
 void CAN_Tx_Task(void* Args){
 	TickType_t xLastWakeTime;
-	const TickType_t xPeriod = pdMS_TO_TICKS( 4000 );	// Keep Alive every 5 seconds
+	const TickType_t xPeriod = pdMS_TO_TICKS( 5000 );	// Keep Alive every 5 seconds
 	xLastWakeTime = xTaskGetTickCount();
 
 	/* Setup Tx Message Buffer. */
@@ -219,10 +220,15 @@ void CAN_Tx_Task(void* Args){
 	txXfer.mbIdx = (uint8_t)TX_MESSAGE_BUFFER_NUM;
 	txXfer.frame = &txFrame;
 
-	txFrame.dataWord0 = CAN_WORD0_DATA_BYTE_0(0x10) | CAN_WORD0_DATA_BYTE_1(0x20) | CAN_WORD0_DATA_BYTE_2(0x30) |
-						CAN_WORD0_DATA_BYTE_3(0x40);
-	txFrame.dataWord1 = CAN_WORD1_DATA_BYTE_4(0x50) | CAN_WORD1_DATA_BYTE_5(0x60) | CAN_WORD1_DATA_BYTE_6(0x70) |
-						CAN_WORD1_DATA_BYTE_7(0x80);
+	txFrame.dataWord0 = CAN_WORD0_DATA_BYTE_0(KeepAlive_Value) |
+						CAN_WORD0_DATA_BYTE_1(0x00) |
+						CAN_WORD0_DATA_BYTE_2(0x00) |
+						CAN_WORD0_DATA_BYTE_3(0x00);
+
+	txFrame.dataWord1 = CAN_WORD1_DATA_BYTE_4(0x00) |
+						CAN_WORD1_DATA_BYTE_5(0x00) |
+						CAN_WORD1_DATA_BYTE_6(0x00) |
+						CAN_WORD1_DATA_BYTE_7(0x00);
 
 	for(;;){
 		/* Send data through Tx Message Buffer. */
