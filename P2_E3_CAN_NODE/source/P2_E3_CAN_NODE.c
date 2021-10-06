@@ -24,6 +24,7 @@
 
 #include "fsl_debug_console.h"
 #include "fsl_flexcan.h"
+#include "fsl_adc16.h"
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "board.h"
@@ -42,17 +43,26 @@
 #define TX_MESSAGE_BUFFER_NUM      (8)
 #define DLC                        (8)
 
+#define ADC_BASE			ADC0
+#define ADC_CHANNEL_GROUP	0U
+#define ADC_USER_CHANNEL	12U
+
 /* Fix MISRA_C-2012 Rule 17.7. */
 #define LOG_INFO (void)PRINTF
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
+void CAN_Initialize();
+void ADC_Initialize();
 void CAN_Rx_Task(void* Args);
 void CAN_Tx_Task(void* Args);
+void ADC_read(void* Args);
+void LED_change(void* Args);
 
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+const uint32_t g_Adc16_12bitFullRange = 4096U;
 volatile bool txComplete = false;
 volatile bool rxComplete = false;
 flexcan_handle_t flexcanHandle;
@@ -97,13 +107,62 @@ static FLEXCAN_CALLBACK(flexcan_callback)
  */
 int main(void)
 {
-    flexcan_config_t flexcanConfig;
-
     /* Initialize board hardware. */
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
+    /*Initialize CAN*/
+    //CAN_Initialize();
+    xTaskCreate(ADC_read,"ADC_Read",(configMINIMAL_STACK_SIZE*10),NULL,2,NULL);
+    /* Start the scheduler. */
+     vTaskStartScheduler();
+     while(1)
+     {
+     }
+}
+void ADC_Initialize(){
+	adc16_config_t adc16ConfigStruct;
+	ADC16_GetDefaultConfig(&adc16ConfigStruct);
+	#ifdef BOARD_ADC_USE_ALT_VREF
+	    adc16ConfigStruct.referenceVoltageSource = kADC16_ReferenceVoltageSourceValt;
+	#endif
+	    ADC16_Init(ADC_BASE, &adc16ConfigStruct);
+	    ADC16_EnableHardwareTrigger(ADC_BASE, false); /* Make sure the software trigger is used. */
+	#if defined(FSL_FEATURE_ADC16_HAS_CALIBRATION) && FSL_FEATURE_ADC16_HAS_CALIBRATION
+	    if (kStatus_Success == ADC16_DoAutoCalibration(ADC_BASE))
+	    {
+	        PRINTF("ADC16_DoAutoCalibration() Done.\r\n");
+	    }
+	    else
+	    {
+	        PRINTF("ADC16_DoAutoCalibration() Failed.\r\n");
+	    }
+	#endif /* FSL_FEATURE_ADC16_HAS_CALIBRATION */
 
+	    PRINTF("ADC Full Range: %d\r\n", g_Adc16_12bitFullRange);
+
+}
+void ADC_read(void* Args){
+	float adc_data;
+	adc16_channel_config_t adc16ChannelConfigStruct;
+	PRINTF("Press any key to get user channel's ADC value ...\r\n");
+
+		    adc16ChannelConfigStruct.channelNumber                        = ADC_USER_CHANNEL;
+		    adc16ChannelConfigStruct.enableInterruptOnConversionCompleted = false;
+		#if defined(FSL_FEATURE_ADC16_HAS_DIFF_MODE) && FSL_FEATURE_ADC16_HAS_DIFF_MODE
+		    adc16ChannelConfigStruct.enableDifferentialConversion = false;
+		#endif /* FSL_FEATURE_ADC16_HAS_DIFF_MODE */
+	for(;;){
+		GETCHAR();
+		ADC16_SetChannelConfig(ADC_BASE, ADC_CHANNEL_GROUP, &adc16ChannelConfigStruct);
+		while (0U == (kADC16_ChannelConversionDoneFlag & ADC16_GetChannelStatusFlags(ADC_BASE, ADC_CHANNEL_GROUP)))
+		        {
+		        }
+		        PRINTF("ADC Value: %d\r\n", ADC16_GetChannelConversionValue(ADC_BASE, ADC_CHANNEL_GROUP));
+	}
+}
+void CAN_Initialize(){
+	flexcan_config_t flexcanConfig;
     if(xTaskCreate(
       CAN_Rx_Task, /* Pointer to the function that implements the task. */
       "CAN_Rx_Task", /* Text name given to the task. */
@@ -165,20 +224,13 @@ int main(void)
 
     /* Create FlexCAN handle structure and set call back function. */
     FLEXCAN_TransferCreateHandle(EXAMPLE_CAN, &flexcanHandle, flexcan_callback, NULL);
-
-    /* Start the scheduler. */
-     vTaskStartScheduler();
-     while(1)
-     {
-     }
 }
-
 
 void CAN_Rx_Task(void* Args){
 	/* Setup Rx Message Buffer. */
     mbConfig.format = kFLEXCAN_FrameFormatStandard;
     mbConfig.type   = kFLEXCAN_FrameTypeData;
-    mbConfig.id     = FLEXCAN_ID_STD(0x123);
+    mbConfig.id     = FLEXCAN_ID_STD(0x55);
 
     FLEXCAN_SetRxMbConfig(EXAMPLE_CAN, RX_MESSAGE_BUFFER_NUM, &mbConfig, true);
 
