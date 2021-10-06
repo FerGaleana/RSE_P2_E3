@@ -33,11 +33,11 @@
 /* clang-format off */
 /* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Clocks v7.0
+product: Clocks v8.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 9.0.0
+processor_version: 10.0.0
 board: FRDM-K64F
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
@@ -48,19 +48,12 @@ board: FRDM-K64F
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define MCG_IRCLK_DISABLE                                 0U  /*!< MCGIRCLK disabled */
 #define MCG_PLL_DISABLE                                   0U  /*!< MCGPLLCLK disabled */
 #define OSC_CAP0P                                         0U  /*!< Oscillator 0pF capacitor load */
 #define OSC_ER_CLK_DISABLE                                0U  /*!< Disable external reference clock */
-#define SIM_CLKOUT_SEL_FLEXBUS_CLK                        0U  /*!< CLKOUT pin clock select: FlexBus clock */
-#define SIM_ENET_1588T_CLK_SEL_OSCERCLK_CLK               2U  /*!< SDHC clock select: OSCERCLK clock */
-#define SIM_ENET_RMII_CLK_SEL_EXTAL_CLK                   0U  /*!< SDHC clock select: Core/system clock */
 #define SIM_OSC32KSEL_RTC32KCLK_CLK                       2U  /*!< OSC32KSEL select: RTC32KCLK clock (32.768kHz) */
 #define SIM_PLLFLLSEL_IRC48MCLK_CLK                       3U  /*!< PLLFLL select: IRC48MCLK clock */
 #define SIM_PLLFLLSEL_MCGPLLCLK_CLK                       1U  /*!< PLLFLL select: MCGPLLCLK clock */
-#define SIM_SDHC_CLK_SEL_OSCERCLK_CLK                     2U  /*!< SDHC clock select: OSCERCLK clock */
-#define SIM_TRACE_CLK_SEL_CORE_SYSTEM_CLK                 1U  /*!< Trace clock select: Core/system clock */
-#define SIM_USB_CLK_120000000HZ                   120000000U  /*!< Input SIM frequency for USB: 120000000Hz */
 
 /*******************************************************************************
  * Variables
@@ -101,40 +94,30 @@ name: BOARD_BootClockRUN
 called_from_default_init: true
 outputs:
 - {id: Bus_clock.outFreq, value: 60 MHz}
-- {id: CLKOUT.outFreq, value: 40 MHz}
 - {id: Core_clock.outFreq, value: 120 MHz, locked: true, accuracy: '0.001'}
-- {id: ENET1588TSCLK.outFreq, value: 50 MHz}
 - {id: Flash_clock.outFreq, value: 24 MHz}
 - {id: FlexBus_clock.outFreq, value: 40 MHz}
 - {id: LPO_clock.outFreq, value: 1 kHz}
 - {id: MCGFFCLK.outFreq, value: 1.5625 MHz}
-- {id: MCGIRCLK.outFreq, value: 2 MHz}
+- {id: MCGIRCLK.outFreq, value: 32.768 kHz}
 - {id: OSCERCLK.outFreq, value: 50 MHz}
 - {id: PLLFLLCLK.outFreq, value: 120 MHz}
-- {id: RMIICLK.outFreq, value: 50 MHz}
-- {id: SDHCCLK.outFreq, value: 50 MHz}
 - {id: System_clock.outFreq, value: 120 MHz}
-- {id: TRACECLKIN.outFreq, value: 120 MHz}
-- {id: USB48MCLK.outFreq, value: 48 MHz}
 settings:
 - {id: MCGMode, value: PEE}
-- {id: CLKOUTConfig, value: 'yes'}
-- {id: ENETTimeSrcConfig, value: 'yes'}
+- {id: MCG.FCRDIV.scale, value: '1', locked: true}
 - {id: MCG.FRDIV.scale, value: '32'}
-- {id: MCG.IRCS.sel, value: MCG.FCRDIV}
 - {id: MCG.IREFS.sel, value: MCG.FRDIV}
 - {id: MCG.PLLS.sel, value: MCG.PLL}
-- {id: MCG.PRDIV.scale, value: '15'}
-- {id: MCG.VDIV.scale, value: '36'}
+- {id: MCG.PRDIV.scale, value: '20', locked: true}
+- {id: MCG.VDIV.scale, value: '48', locked: true}
 - {id: MCG_C1_IRCLKEN_CFG, value: Enabled}
 - {id: MCG_C2_RANGE0_CFG, value: Very_high}
 - {id: MCG_C2_RANGE0_FRDIV_CFG, value: Very_high}
 - {id: OSC_CR_ERCLKEN_CFG, value: Enabled}
-- {id: RMIISrcConfig, value: 'yes'}
 - {id: RTCCLKOUTConfig, value: 'yes'}
 - {id: RTC_CR_OSCE_CFG, value: Enabled}
 - {id: RTC_CR_OSC_CAP_LOAD_CFG, value: SC10PF}
-- {id: SDHCClkConfig, value: 'yes'}
 - {id: SIM.OSC32KSEL.sel, value: RTC.RTC32KCLK}
 - {id: SIM.OUTDIV2.scale, value: '2'}
 - {id: SIM.OUTDIV3.scale, value: '3'}
@@ -146,8 +129,6 @@ settings:
 - {id: SIM.USBDIV.scale, value: '5'}
 - {id: SIM.USBFRAC.scale, value: '2'}
 - {id: SIM.USBSRCSEL.sel, value: SIM.USBDIV}
-- {id: TraceClkConfig, value: 'yes'}
-- {id: USBClkConfig, value: 'yes'}
 sources:
 - {id: OSC.OSC.outFreq, value: 50 MHz, enabled: true}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
@@ -160,8 +141,8 @@ const mcg_config_t mcgConfig_BOARD_BootClockRUN =
     {
         .mcgMode = kMCG_ModePEE,                  /* PEE - PLL Engaged External */
         .irclkEnableMode = kMCG_IrclkEnable,      /* MCGIRCLK enabled, MCGIRCLK disabled in STOP mode */
-        .ircs = kMCG_IrcFast,                     /* Fast internal reference clock selected */
-        .fcrdiv = 0x1U,                           /* Fast IRC divider: divided by 2 */
+        .ircs = kMCG_IrcSlow,                     /* Slow internal reference clock selected */
+        .fcrdiv = 0x0U,                           /* Fast IRC divider: divided by 1 */
         .frdiv = 0x0U,                            /* FLL reference clock divider: divided by 32 */
         .drs = kMCG_DrsLow,                       /* Low frequency range */
         .dmx32 = kMCG_Dmx32Default,               /* DCO has a default range of 25% */
@@ -169,8 +150,8 @@ const mcg_config_t mcgConfig_BOARD_BootClockRUN =
         .pll0Config =
             {
                 .enableMode = MCG_PLL_DISABLE,    /* MCGPLLCLK disabled */
-                .prdiv = 0xeU,                    /* PLL Reference divider: divided by 15 */
-                .vdiv = 0xcU,                     /* VCO divider: multiplied by 36 */
+                .prdiv = 0x13U,                   /* PLL Reference divider: divided by 20 */
+                .vdiv = 0x18U,                    /* VCO divider: multiplied by 48 */
             },
     };
 const sim_clock_config_t simConfig_BOARD_BootClockRUN =
@@ -214,18 +195,6 @@ void BOARD_BootClockRUN(void)
     CLOCK_SetSimConfig(&simConfig_BOARD_BootClockRUN);
     /* Set SystemCoreClock variable. */
     SystemCoreClock = BOARD_BOOTCLOCKRUN_CORE_CLOCK;
-    /* Enable USB FS clock. */
-    CLOCK_EnableUsbfs0Clock(kCLOCK_UsbSrcPll0, SIM_USB_CLK_120000000HZ);
-    /* Set enet timestamp clock source. */
-    CLOCK_SetEnetTime0Clock(SIM_ENET_1588T_CLK_SEL_OSCERCLK_CLK);
-    /* Set RMII clock source. */
-    CLOCK_SetRmii0Clock(SIM_ENET_RMII_CLK_SEL_EXTAL_CLK);
-    /* Set SDHC clock source. */
-    CLOCK_SetSdhc0Clock(SIM_SDHC_CLK_SEL_OSCERCLK_CLK);
-    /* Set CLKOUT source. */
-    CLOCK_SetClkOutClock(SIM_CLKOUT_SEL_FLEXBUS_CLK);
-    /* Set debug trace clock source. */
-    CLOCK_SetTraceClock(SIM_TRACE_CLK_SEL_CORE_SYSTEM_CLK);
 }
 
 /*******************************************************************************
@@ -241,6 +210,7 @@ outputs:
 - {id: Flash_clock.outFreq, value: 800 kHz}
 - {id: FlexBus_clock.outFreq, value: 4 MHz}
 - {id: LPO_clock.outFreq, value: 1 kHz}
+- {id: MCGIRCLK.outFreq, value: 4 MHz}
 - {id: System_clock.outFreq, value: 4 MHz}
 settings:
 - {id: MCGMode, value: BLPI}
@@ -249,6 +219,7 @@ settings:
 - {id: MCG.FCRDIV.scale, value: '1'}
 - {id: MCG.FRDIV.scale, value: '32'}
 - {id: MCG.IRCS.sel, value: MCG.FCRDIV}
+- {id: MCG_C1_IRCLKEN_CFG, value: Enabled}
 - {id: MCG_C2_RANGE0_CFG, value: Very_high}
 - {id: MCG_C2_RANGE0_FRDIV_CFG, value: Very_high}
 - {id: RTC_CR_OSCE_CFG, value: Enabled}
@@ -269,7 +240,7 @@ sources:
 const mcg_config_t mcgConfig_BOARD_BootClockVLPR =
     {
         .mcgMode = kMCG_ModeBLPI,                 /* BLPI - Bypassed Low Power Internal */
-        .irclkEnableMode = MCG_IRCLK_DISABLE,     /* MCGIRCLK disabled */
+        .irclkEnableMode = kMCG_IrclkEnable,      /* MCGIRCLK enabled, MCGIRCLK disabled in STOP mode */
         .ircs = kMCG_IrcFast,                     /* Fast internal reference clock selected */
         .fcrdiv = 0x0U,                           /* Fast IRC divider: divided by 1 */
         .frdiv = 0x0U,                            /* FLL reference clock divider: divided by 32 */
