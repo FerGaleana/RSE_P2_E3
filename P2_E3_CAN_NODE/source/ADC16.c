@@ -1,14 +1,12 @@
 /*
-*         ADC16.c
-*  Created on: 6 oct. 2021
-*      Author: RSE_E3
-*
-*/
+ * ADC16.c
+ *
+ *  Created on: 6 oct. 2021
+ *      Author: RSE_E3
+ */
 
 #include "ADC16.h"
-
 #include "board.h"
-
 #include "fsl_debug_console.h"
 /*******************************************************************************
  * Variables
