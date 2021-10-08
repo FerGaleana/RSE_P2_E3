@@ -1,0 +1,2 @@
+fsl_common_arm.c:159:13:DelayLoop	16	static
+fsl_common_arm.c:189:6:SDK_DelayAtLeastUs	32	static
