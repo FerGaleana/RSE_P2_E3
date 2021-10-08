@@ -18,6 +18,8 @@
 #include "clock_config.h"
 #include "board.h"
 #include "fsl_phy.h"
+#include "fsl_phy.h"
+
 
 #include "lwip/api.h"
 #include "lwip/apps/mqtt.h"
