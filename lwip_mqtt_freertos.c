@@ -337,6 +337,8 @@ static void app_thread(void *arg)
     err_t err;
     int i;
 
+    int __value;
+
     /* Wait for address from DHCP */
 
     PRINTF("Getting IP address from DHCP...\r\n"); //Puedes captar una IP del servidor que te va a ser asignada
