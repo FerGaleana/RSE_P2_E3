@@ -91,7 +91,7 @@ void HardFault_Handler(void){
     		    "STR R1,[ R0,#0 ] \n" // R0 is at location 0 on stack
     	// Return from hard fault handler to application
             "BX LR \n"
-        ".syntax divided\n") ;
+        ".syntax divided\n");
 }
 
 #endif

@@ -1,8 +1,11 @@
 /*
  * MensajesTxRx.h
- *
+ *  
+ *  Definiciones de Tipos de Datos de Envios
+ * 
  *  Created on: 3 oct 2021
- *      Author: RSEO2021 EQ3
+ *  Author: RSEO2021 EQ3
+ * 
  */
 
 #ifndef MENSAJESTXRX_H_

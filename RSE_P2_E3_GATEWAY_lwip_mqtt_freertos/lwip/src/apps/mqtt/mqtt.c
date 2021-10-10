@@ -269,8 +269,6 @@ mqtt_output_send(struct mqtt_ringbuf_t *rb, struct altcp_pcb *tpcb)
   }
 }
 
-
-
 /*--------------------------------------------------------------------------------------------------------------------- */
 /* Request queue */
 
@@ -303,7 +301,6 @@ mqtt_create_request(struct mqtt_request_t *r_objs, size_t r_objs_len, u16_t pkt_
   return r;
 }
 
-
 /**
  * Append request to pending request queue
  * @param tail Pointer to request queue tail pointer
@@ -332,7 +329,6 @@ mqtt_append_request(struct mqtt_request_t **tail, struct mqtt_request_t *r)
     head->next = r;
   }
 }
-
 
 /**
  * Delete request item
@@ -445,7 +441,6 @@ mqtt_init_requests(struct mqtt_request_t *r_objs, size_t r_objs_len)
 
 /*--------------------------------------------------------------------------------------------------------------------- */
 /* Output message build helpers */
-
 
 static void
 mqtt_output_append_u8(struct mqtt_ringbuf_t *rb, u8_t value)
@@ -622,7 +617,6 @@ mqtt_cyclic_timer(void *arg)
   }
 }
 
-
 /**
  * Send PUBACK, PUBREC or PUBREL response message
  * @param client MQTT client
@@ -659,7 +653,6 @@ mqtt_incomming_suback(struct mqtt_request_t *r, u8_t result)
     r->cb(r->arg, result < 3 ? ERR_OK : ERR_ABRT);
   }
 }
-
 
 /**
  * Complete MQTT message received or buffer full
@@ -844,6 +837,7 @@ out_disconnect:
  * @param p PBUF chain of received data
  * @return Connection status
  */
+
 static mqtt_connection_status_t
 mqtt_parse_incoming(mqtt_client_t *client, struct pbuf *p)
 {
@@ -1053,6 +1047,7 @@ mqtt_tcp_poll_cb(void *arg, struct altcp_pcb *tpcb)
  * @param err Always ERR_OK, mqtt_tcp_err_cb is called in case of error
  * @return ERR_OK
  */
+
 static err_t
 mqtt_tcp_connect_cb(void *arg, struct altcp_pcb *tpcb, err_t err)
 {
@@ -1089,8 +1084,6 @@ mqtt_tcp_connect_cb(void *arg, struct altcp_pcb *tpcb, err_t err)
 
 /*---------------------------------------------------------------------------------------------------- */
 /* Public API */
-
-
 /**
  * @ingroup mqtt
  * MQTT publish function.
@@ -1170,7 +1163,6 @@ mqtt_publish(mqtt_client_t *client, const char *topic, void *payload, u16_t payl
   return ERR_OK;
 }
 
-
 /**
  * @ingroup mqtt
  * MQTT subscribe/unsubscribe function.
@@ -1237,7 +1229,6 @@ mqtt_sub_unsub(mqtt_client_t *client, const char *topic, u8_t qos, mqtt_request_
   mqtt_output_send(&client->output, client->conn);
   return ERR_OK;
 }
-
 
 /**
  * @ingroup mqtt
@@ -1449,7 +1440,6 @@ tcp_fail:
   client->conn = NULL;
   return err;
 }
-
 
 /**
  * @ingroup mqtt

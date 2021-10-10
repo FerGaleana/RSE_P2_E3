@@ -402,6 +402,7 @@ static void mqtt_message_published_cb(void *arg, err_t err)
 static void publish_message(void *ctx)
 {
     static const char *topic2   = "pabloavalosch/feeds/estado_nodo_can"; //En cuál tópico quieres publicar?
+
     static const char *topic1  = "pabloavalosch/feeds/nivel-de-bateria";
 
     static char *message1 = "2.7V"; //Este valor fue sólo para testear
@@ -692,8 +693,10 @@ int main(void)
               xHandle. */
      ) != pdPASS )
      {
+
     	LOG_INFO("Failing to create CAN_Rx_Task");
     	while(1);
+     
      }
 
 
@@ -708,9 +711,12 @@ int main(void)
       NULL /* The handle to the task being created will be placed in
               xHandle. */
      ) != pdPASS )
+     
      {
+
     	LOG_INFO("Failing to create CAN_Tx_Task");
     	while(1);
+     
      }
 
     LOG_INFO("\r\n==FlexCAN loopback example -- Start.==\r\n\r\n");
@@ -734,7 +740,7 @@ int main(void)
     vTaskStartScheduler();
 
     while(1){
-    	// Never come here
+    	// Never enters
     }
 
     /* Will not get here unless a task calls vTaskEndScheduler ()*/
@@ -801,8 +807,6 @@ void CAN_Rx_Task(void* Args){
 		vTaskDelayUntil( &xLastWakeTime, xPeriod );
     }
 }
-
-
 
 void CAN_Tx_Task(void* Args){
 	TickType_t xLastWakeTime;

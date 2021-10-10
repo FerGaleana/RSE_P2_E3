@@ -21,13 +21,13 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
 #include "fsl_debug_console.h"
 #include "peripherals.h"
 #include "fsl_flexcan.h"
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "board.h"
+
 /* TODO: insert other include files here. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -57,6 +57,7 @@ void CAN_Node_Init(void* Args);
 void CAN_Rx_Task(void* Args);
 void CAN_Tx_Task(void* Args);
 void CAN_Tx_ADC_Task(void* Args);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -67,7 +68,6 @@ flexcan_mb_transfer_t txXfer, rxXfer;
 flexcan_frame_t txFrame, rxFrame;
 flexcan_rx_mb_config_t mbConfig;
 uint8_t g_delay_samples = 1;
-
 
 /*******************************************************************************
  * Code
@@ -94,7 +94,6 @@ static FLEXCAN_CALLBACK(flexcan_callback)
                 txComplete = true;
             }
             break;
-
         default:
             break;
     }
@@ -119,6 +118,7 @@ int main(void)
     }
 }
 
+
 void CAN_Node_Init(void* Args)
 {
 	flexcan_config_t flexcanConfig;
@@ -127,10 +127,12 @@ void CAN_Node_Init(void* Args)
 	    kGPIO_DigitalOutput,
 		1
 	};
+
 	//Configure GPIO for LED
 	CLOCK_EnableClock(kCLOCK_PortA);
 	PORT_SetPinMux(BOARD_LED_BLUE_PORT, BOARD_LED_BLUE_PIN, kPORT_MuxAsGpio);
 	GPIO_PinInit(BOARD_LED_BLUE_GPIO, BOARD_LED_BLUE_PIN, &led_config);
+
 	//Create CAN tasks
     if(xTaskCreate(CAN_Rx_Task, "CAN_Rx_Task", (configMINIMAL_STACK_SIZE),NULL,(configMAX_PRIORITIES-5),NULL) != pdPASS )
      {
@@ -152,7 +154,6 @@ void CAN_Node_Init(void* Args)
 
     //flexcanConfig.enableLoopBack = true;
     flexcanConfig.baudRate               = 125000U;
-
     FLEXCAN_Init(EXAMPLE_CAN, &flexcanConfig, EXAMPLE_CAN_CLK_FREQ);
 
     /* Create FlexCAN handle structure and set call back function. */
@@ -160,6 +161,7 @@ void CAN_Node_Init(void* Args)
 }
 
 void CAN_Rx_Task(void* Args){
+
 	uint8_t actuator_contr;
 	uint32_t lvl_freq;
 	static uint8_t last_status_led = 0;
@@ -176,7 +178,8 @@ void CAN_Rx_Task(void* Args){
 
     for(;;){
     	(void)FLEXCAN_TransferReceiveNonBlocking(EXAMPLE_CAN, &flexcanHandle, &rxXfer);
-    	if(rxComplete){
+    	
+		if(rxComplete){
     		//Only for debug
 
         	LOG_INFO("\r\nReceived message from MB%d\r\n", RX_MESSAGE_BUFFER_NUM);
@@ -198,12 +201,14 @@ void CAN_Rx_Task(void* Args){
         	}
         	rxComplete = false;
     	}
+
     }
 }
 
 void CAN_Tx_Task(void* Args){
+
 	TickType_t xLastWakeTime;
-	const TickType_t xPeriod = pdMS_TO_TICKS( KA_DELAY*1000 );	// Keep Alive every 5 seconds
+	const TickType_t xPeriod = pdMS_TO_TICKS( KA_DELAY*1000 );	// Keep Alive de Nodo every 5 seconds
 	xLastWakeTime = xTaskGetTickCount();
 	static uint8_t delay_counter = 0;
 
@@ -238,15 +243,17 @@ void CAN_Tx_Task(void* Args){
 			delay_counter = 0;
 		}
 		/* Send data through Tx Message Buffer. */
+
 		(void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &flexcanHandle, &txXfer);
 		if(txComplete){
-			//Only for debug
 
+			//Only for debug
 			LOG_INFO("\r\nSending KA\r\nSend message from MB%d to MB%d\r\n", TX_MESSAGE_BUFFER_NUM, RX_MESSAGE_BUFFER_NUM);
 			LOG_INFO("tx word0 = 0x%x\r\n", txFrame.dataWord0);
 			LOG_INFO("tx word1 = %u\r\n", txFrame.dataWord1);
-
+			
 			txComplete = false;
+
 		}else{}
 		vTaskDelayUntil( &xLastWakeTime, xPeriod );
 	}
