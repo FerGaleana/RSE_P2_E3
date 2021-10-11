@@ -33,11 +33,6 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  *
- * This file is part of the lwIP TCP/IP stack
- *
- * Author: Erik Andersson <erian747@gmail.com>
- *
- *
  * @todo:
  * - Handle large outgoing payloads for PUBLISH messages
  * - Fix restriction of a single topic in each (UN)SUBSCRIBE message (protocol has support for multiple topics)
@@ -121,7 +116,6 @@ enum mqtt_connect_flag {
   MQTT_CONNECT_FLAG_CLEAN_SESSION = 1 << 1
 };
 
-
 static void mqtt_cyclic_timer(void *arg);
 
 #if defined(LWIP_DEBUG)
@@ -157,7 +151,6 @@ mqtt_msg_type_to_str(u8_t msg_type)
   }
   return mqtt_message_type_str[msg_type];
 }
-
 #endif
 
 
@@ -166,6 +159,7 @@ mqtt_msg_type_to_str(u8_t msg_type)
  * @param client MQTT client
  * @return New packet identifier, range 1 to 65535
  */
+
 static u16_t
 msg_generate_packet_id(mqtt_client_t *client)
 {
@@ -175,6 +169,7 @@ msg_generate_packet_id(mqtt_client_t *client)
   }
   return client->pkt_id_seq;
 }
+
 
 /*--------------------------------------------------------------------------------------------------------------------- */
 /* Output ring buffer */
@@ -267,6 +262,7 @@ mqtt_output_send(struct mqtt_ringbuf_t *rb, struct altcp_pcb *tpcb)
   } else {
     LWIP_DEBUGF(MQTT_DEBUG_WARN, ("mqtt_output_send: Send failed with err %d (\"%s\")\n", err, lwip_strerr(err)));
   }
+
 }
 
 /*--------------------------------------------------------------------------------------------------------------------- */
@@ -498,7 +494,6 @@ mqtt_output_append_fixed_header(struct mqtt_ringbuf_t *rb, u8_t msg_type, u8_t f
   } while (r_length > 0);
 }
 
-
 /**
  * Check output buffer space
  * @param rb Output ring buffer
@@ -521,7 +516,6 @@ mqtt_output_check_space(struct mqtt_ringbuf_t *rb, u16_t r_length)
 
   return (total_len <= mqtt_ringbuf_free(rb));
 }
-
 
 /**
  * Close connection to server
@@ -561,7 +555,6 @@ mqtt_close(mqtt_client_t *client, mqtt_connection_status_t reason)
     }
   }
 }
-
 
 /**
  * Interval timer, called every MQTT_CYCLIC_TIMER_INTERVAL seconds in MQTT_CONNECTING and MQTT_CONNECTED states
@@ -926,7 +919,6 @@ mqtt_parse_incoming(mqtt_client_t *client, struct pbuf *p)
   }
   return MQTT_CONNECT_ACCEPTED;
 }
-
 
 /**
  * TCP received callback function. @see tcp_recv_fn

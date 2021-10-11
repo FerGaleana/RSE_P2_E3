@@ -14,13 +14,8 @@
  * GPIO:
  * 	-Encender o apagar el led de acuerdo a la señal recibida
 */
-/*
- * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
+
+
 #include "fsl_debug_console.h"
 #include "peripherals.h"
 #include "fsl_flexcan.h"
@@ -72,6 +67,7 @@ uint8_t g_delay_samples = 1;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+
 /*!
  * @brief FlexCAN Call Back function
  */
@@ -110,6 +106,7 @@ int main(void)
     BOARD_InitDebugConsole();
     ADC16_init();
     CAN_Node_Init(NULL);
+
     /* Start the scheduler. */
     vTaskStartScheduler();
 
@@ -117,7 +114,6 @@ int main(void)
     	// Never get here
     }
 }
-
 
 void CAN_Node_Init(void* Args)
 {
@@ -165,6 +161,7 @@ void CAN_Rx_Task(void* Args){
 	uint8_t actuator_contr;
 	uint32_t lvl_freq;
 	static uint8_t last_status_led = 0;
+
 	/* Setup Rx Message Buffer. */
     mbConfig.format = kFLEXCAN_FrameFormatStandard;
     mbConfig.type   = kFLEXCAN_FrameTypeData;
@@ -242,8 +239,8 @@ void CAN_Tx_Task(void* Args){
 		{
 			delay_counter = 0;
 		}
-		/* Send data through Tx Message Buffer. */
 
+		/* Send data through Tx Message Buffer. */
 		(void)FLEXCAN_TransferSendNonBlocking(EXAMPLE_CAN, &flexcanHandle, &txXfer);
 		if(txComplete){
 

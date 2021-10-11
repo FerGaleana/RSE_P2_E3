@@ -1,8 +1,7 @@
 /*
  * MensajesTxRx.h
  *  
- *  Definiciones de Tipos de Datos de Envios
- * 
+ *  Definiciones de Tipos de Datos de Envios TxRx
  *  Created on: 3 oct 2021
  *  Author: RSEO2021 EQ3
  * 
@@ -27,5 +26,4 @@ bool g_ComandoActua = false;	// 1 bit
 
 #define ON  1
 #define OFF 0
-
 #endif /* MENSAJESTXRX_H_ */

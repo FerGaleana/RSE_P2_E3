@@ -179,15 +179,14 @@ static FLEXCAN_CALLBACK(flexcan_callback)
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-
 static void connect_to_mqtt(void *ctx);
 
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-
 static mdio_handle_t mdioHandle = {.ops = &EXAMPLE_MDIO_OPS};
 static phy_handle_t phyHandle   = {.phyAddr = EXAMPLE_PHY_ADDRESS, .mdioHandle = &mdioHandle, .ops = &EXAMPLE_PHY_OPS};
+
 
 /*! @brief MQTT client data. */
 static mqtt_client_t *mqtt_client;
@@ -243,7 +242,6 @@ static void mqtt_topic_subscribed_cb(void *arg, err_t err)
 static void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len)
 {
     LWIP_UNUSED_ARG(arg);
-    //PRINTF("Received %u bytes from the topic \"%s\": \"", tot_len, topic);
 }
 
 /*!
@@ -253,7 +251,8 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
 {
     int i;
     uint8_t temp_freq, temp_act;
-    //Save before change to compare and know if the message must be sent
+ 
+     //Save before change to compare and know if the message must be sent
     temp_freq = g_freq;
     temp_act = g_actuator;
     LWIP_UNUSED_ARG(arg);
@@ -371,8 +370,8 @@ static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection
  */
 static void connect_to_mqtt(void *ctx)
 {
-    LWIP_UNUSED_ARG(ctx);
 
+    LWIP_UNUSED_ARG(ctx);
     PRINTF("Connecting to MQTT broker at %s...\r\n", ipaddr_ntoa(&mqtt_addr));
 
     mqtt_client_connect(mqtt_client, &mqtt_addr, EXAMPLE_MQTT_SERVER_PORT, mqtt_connection_cb,
@@ -388,7 +387,8 @@ static void mqtt_message_published_cb(void *arg, err_t err)
 
     if (err == ERR_OK)
     {
-//        PRINTF("Published to the topic \"%s\".\r\n", topic);
+        //  Realize publish to any topic passed by Args
+        //  PRINTF("Published to the topic \"%s\".\r\n", topic);
     }
     else
     {
@@ -407,8 +407,10 @@ static void publish_message(void *ctx)
 
     static char *message1 = "2.7V"; //Este valor fue sólo para testear
     static char *message2 = "1";	// "1" prende
-    static char *message3 = "0";	// "0" apaga
+    static char *message3 = "0";	// "0" 
+    
     if( 0xa == g_KeepAlive ){
+
         //PRINTF("Going to publish to the topic \"%s\"...\r\n", topic2);
         //Publish the CAN_Node status
         mqtt_publish(mqtt_client, topic2, message2, strlen(message2), 1, 0, mqtt_message_published_cb, (void *)topic2);
@@ -491,12 +493,11 @@ static void publish_message(void *ctx)
         	}
         }
     }else{
-//        PRINTF("Going to publish to the topic \"%s\"...\r\n", topic2);
+//       Topic #2 Publish to Broker
         mqtt_publish(mqtt_client, topic2, message3, strlen(message3), 1, 0, mqtt_message_published_cb, (void *)topic2);
     }
 
     g_KeepAlive = 0x0000000;
-
     LWIP_UNUSED_ARG(ctx);
 }
 
@@ -510,8 +511,9 @@ static void app_thread(void *arg)
     err_t err;
     int i;
 
+    //Aqui solicitia la IP a traves de DHCP
     /* Wait for address from DHCP */
-
+    
     PRINTF("Getting IP address from DHCP...\r\n");
 
     do
@@ -576,10 +578,8 @@ static void app_thread(void *arg)
             }
             i++;
         }
-
         sys_msleep(1000U);
     }
-
     vTaskDelete(NULL);
 }
 
@@ -596,8 +596,7 @@ static void generate_client_id(void)
     {
         PRINTF("snprintf failed: %d\r\n", res);
         while (1)
-        {
-        }
+        {}
     }
 }
 
@@ -662,6 +661,7 @@ static void stack_init(void *arg)
 
 int main(void)
 {
+
     SYSMPU_Type *base = SYSMPU;
 
     /* Initialize board hardware. */
@@ -670,7 +670,6 @@ int main(void)
     BOARD_InitDebugConsole();
     /* Disable SYSMPU. */
     base->CESR &= ~SYSMPU_CESR_VLD_MASK;
-
 
     /* Initialize lwIP from thread */
     if (sys_thread_new("main", stack_init, NULL, INIT_THREAD_STACKSIZE, INIT_THREAD_PRIO) == NULL)
@@ -693,12 +692,9 @@ int main(void)
               xHandle. */
      ) != pdPASS )
      {
-
     	LOG_INFO("Failing to create CAN_Rx_Task");
     	while(1);
-     
      }
-
 
     if(xTaskCreate(
       CAN_Tx_Task, /* Pointer to the function that implements the task. */
@@ -713,10 +709,8 @@ int main(void)
      ) != pdPASS )
      
      {
-
     	LOG_INFO("Failing to create CAN_Tx_Task");
     	while(1);
-     
      }
 
     LOG_INFO("\r\n==FlexCAN loopback example -- Start.==\r\n\r\n");
@@ -826,9 +820,10 @@ void CAN_Tx_Task(void* Args){
 	txXfer.frame = &txFrame;
 
 	for(;;){
+
 		/* Send data through Tx Message Buffer. */
 		//Send by event, if the frequency or the act value has changed
-		if(g_send_flag)
+        if(g_send_flag)
 		{
 			txFrame.dataWord0 = g_freq;
 			txFrame.dataWord1 = g_actuator;
@@ -843,4 +838,5 @@ void CAN_Tx_Task(void* Args){
 		}
 		vTaskDelayUntil( &xLastWakeTime, xPeriod );
 	}
+
 }

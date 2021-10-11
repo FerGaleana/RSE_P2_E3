@@ -14,7 +14,6 @@
  ******************************************************************************/
 
 const uint32_t g_Adc16_16bitFullRange = 65536U;
-
 adc16_config_t adc16ConfigStruct;
 adc16_channel_config_t adc16ChannelConfigStruct;
 
@@ -39,6 +38,7 @@ void ADC16_init()
 #endif
     ADC16_Init(DEMO_ADC16_BASE, &adc16ConfigStruct);
     ADC16_EnableHardwareTrigger(DEMO_ADC16_BASE, false); /* Make sure the software trigger is used. */
+    
     /*
 #if defined(FSL_FEATURE_ADC16_HAS_CALIBRATION) && FSL_FEATURE_ADC16_HAS_CALIBRATION
     if (kStatus_Success == ADC16_DoAutoCalibration(DEMO_ADC16_BASE))
@@ -60,7 +60,7 @@ void ADC16_init()
 
 uint32_t ADC16_read()
 {
-	float adc_reading;
+    float adc_reading;
     ADC16_SetChannelConfig(DEMO_ADC16_BASE, DEMO_ADC16_CHANNEL_GROUP, &adc16ChannelConfigStruct);
     while (0U == (kADC16_ChannelConversionDoneFlag &
                   ADC16_GetChannelStatusFlags(DEMO_ADC16_BASE, DEMO_ADC16_CHANNEL_GROUP))){}
